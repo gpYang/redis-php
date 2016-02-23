@@ -116,7 +116,7 @@ class Redis_toolkit
         $this->redis->del($key);
     }
 
-    // 推送数据给列表，头部
+    // 推送一条数据至列表，头部
     public function push_list( $key, $arr ) 
     {
         $key = 'list:' . $key;
@@ -150,7 +150,7 @@ class Redis_toolkit
         $this->redis->del($key);
     }
 
-    // 使用递归，将stdClass转array
+    // 使用递归，将stdClass转为array
     protected function object_to_array( $obj )
     {
         if(is_object($obj)){
