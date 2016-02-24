@@ -28,7 +28,11 @@ class Redis_toolkit
     // 连接redis服务器
     public function connect($config = array())
     {
-        $state = $this->redis->connect($config['ip'], $config['port']);
+        if(!empty($config)){
+            $this->ip = $config['ip'];
+            $this->port = $config['port'];
+        }
+        $state = $this->redis->connect($this->ip, $this->port);
         if($state == false){
             die('redis connect failure');
         }
@@ -86,7 +90,7 @@ class Redis_toolkit
     // 设置一行数据
     public function set_row( $table, $id, $arr, $expire=null ) 
     {
-        $key = $table . ':' . $id;
+        $key = 'table:' . $table . ':' . $id;
         $this->redis->hMset($key, $arr);
         if(!is_null($expire)){
             $this->redis->setTimeout($key, $expire);
@@ -96,7 +100,7 @@ class Redis_toolkit
     // 获取一行数据，$fields可为字符或数组
     public function get_row( $table, $id, $fields=null ) 
     {
-        $key = $table . ':' . $id;
+        $key = 'table:' . $table . ':' . $id;
         if(is_null($fields)){
             $arr = $this->redis->hGetAll($key);
         }else{
@@ -112,7 +116,7 @@ class Redis_toolkit
     // 删除一行数据
     public function delete_row( $table, $id )
     {
-        $key = $table . ':' . $id;
+        $key = 'table:' . $table . ':' . $id;
         $this->redis->del($key);
     }
 
