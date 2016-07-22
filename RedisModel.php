@@ -96,8 +96,8 @@ class RedisModel
         $this->redis->del($key);
     }
 
-    // 设置一行数据
-    public function setRow($table, $id, $arr, $expire = null)
+    // 设置表格的一行数据
+    public function setTableRow($table, $id, $arr, $expire = null)
     {
         $key = 'table:' . $table . ':' . $id;
         $this->redis->hMset($key, $arr);
@@ -106,8 +106,8 @@ class RedisModel
         }
     }
 
-    // 获取一行数据，$fields可为字符或数组
-    public function getRow($table, $id, $fields = null)
+    // 获取表格的一行数据，$fields可为字符或数组
+    public function getTableRow($table, $id, $fields = null)
     {
         $key = 'table:' . $table . ':' . $id;
         if (is_null($fields)) {
@@ -122,8 +122,8 @@ class RedisModel
         return empty($arr) ? null : $arr;
     }
 
-    // 删除一行数据
-    public function deleteRow($table, $id)
+    // 删除表格的一行数据
+    public function deleteTableRow($table, $id)
     {
         $key = 'table:' . $table . ':' . $id;
         $this->redis->del($key);
