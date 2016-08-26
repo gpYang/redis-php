@@ -13,7 +13,7 @@
  *
  */
 
-class RedisModel
+class RedisDriver
 {
 
     protected $redis; // redis对象
@@ -41,8 +41,8 @@ class RedisModel
         if ($state == false) {
             die('redis connect failure');
         }
-        if ($passwd != '') {
-            $this->redis->auth($passwd);
+        if ($this->passwd != '') {
+            $this->redis->auth($this->passwd);
         }
     }
 
