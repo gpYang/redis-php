@@ -20,10 +20,10 @@ class RedisDriver
     protected $ip = '127.0.0.1'; // redis服务器ip地址
     protected $port = '6379'; // redis服务器端口
     protected $passwd = null; // redis密码
-    protected $timeout = 10; // 连接超时时间，单位：秒
 
     public function __construct($config = array())
     {
+        ini_set('default_socket_timeout', -1); // 设置socket不超时
         $this->redis = new Redis();
         empty($config) or $this->connect($config);
     }
@@ -38,7 +38,7 @@ class RedisDriver
                 $this->passwd = $config['passwd'];
             }
         }
-        $state = $this->redis->connect($this->ip, $this->port, $this->timeout);
+        $state = $this->redis->connect($this->ip, $this->port);
         if ($state == false) {
             die('redis connect failure');
         }
