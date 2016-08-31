@@ -92,11 +92,10 @@ class RedisDriver
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
             } else {
-                $str = $this->redis->hGet($key, $fields);
-                $arr = array($fields => $str);
+                $arr = $this->redis->hGet($key, $fields);
             }
         }
-        return empty($arr) ? null : $arr;
+        return empty($arr) ? null : (is_array($arr) ? $arr : array($fields => $arr));
     }
 
     // 删除一条Hash，$field为字符串
@@ -130,11 +129,10 @@ class RedisDriver
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
             } else {
-                $str = $this->redis->hGet($key, $fields);
-                $arr = array($fields => $str);
+                $arr = $this->redis->hGet($key, $fields);
             }
         }
-        return empty($arr) ? null : $arr;
+        return empty($arr) ? null : (is_array($arr) ? $arr : array($fields => $arr));
     }
 
     // 删除表格的一行数据
