@@ -10,69 +10,75 @@ $config = array(
 	'port' => '6379',
 	'passwd' => '123456',
 );
-$redis_model = new RedisModel($config);
+$redisDriver = new RedisDriver($config);
 // 保存
-$redis_model->setString('captcha', '125864', 60);
+$redisDriver->setStr('captcha', '125864', 60);
 // 查询
-$captcha = $redis_model->getString('captcha');
+$captcha = $redisDriver->getStr('captcha');
 // 删除
-$redis_model->deleteString('captcha');
+$redisDriver->delStr('captcha');
 ```
-### 数组 (Array)
+### 哈希表 (Hash)
 
 ```php
-$redis_model = new RedisModel();
+$redisDriver = new RedisDriver();
 $config = array(
 	'ip' => '127.0.0.1',
 	'port' => '6379',
 	'passwd' => '123456',
 );
-$redis_model->connect($config);
+$redisDriver->connect($config);
 $data = array('uid' => 1008, 'name' => '小明');
 // 保存
-$redis_model->setArray('session_id', $data, 7200);
-// 查询
-$array = $redis_model->getArray('session_id');
+$redisDriver->setHash('session_id', $data, 7200);
+// 返回所有字段
+$array = $redisDriver->getHash('session_id');
+// 返回一个字段
+$array = $redisDriver->getHash('session_id', 'name');
+// 返回多个字段
+$array = $redisDriver->getHash('session_id', array('uid', 'name'));
+// 删除一个字段
+$redisDriver->delHash('session_id', 'name');
 // 删除
-$redis_model->deleteArray('session_id');
+$redisDriver->delHash('session_id');
 ```
 
 ## 表格 (Table)
 
 ```php
-$redis_model = new RedisModel();
+$redisDriver = new RedisDriver();
 $config = array(
 	'ip' => '127.0.0.1',
 	'port' => '6379',
 	'passwd' => '123456',
 );
-$redis_model->connect($config);
+$redisDriver->connect($config);
 $data = array('uid' => 1008, 'name' => '小明', 'sex' => 1);
 // 保存
-$redis_model->setTableRow('users', '1008', $data);
+$redisDriver->setTableRow('users', '1008', $data);
 // 查询
-$array = $redis_model->getTableRow('users', '1008');
+$array = $redisDriver->getTableRow('users', '1008');
 // 删除
-$redis_model->deleteTableRow('users', '1008');
+$redisDriver->delTableRow('users', '1008');
 ```
 
 ## 列表 (List)
 
 ```php
-$redis_model = new RedisModel();
+$redisDriver = new RedisDriver();
 $config = array(
 	'ip' => '127.0.0.1',
 	'port' => '6379',
 	'passwd' => '123456',
 );
-$redis_model->connect($config);
+$redisDriver->connect($config);
 $data = array('uid' => 1008, 'name' => '小明', 'sex' => 1);
 // 入列
-$redis_model->pushList('queue_userinfo', '1008', $data);
+$redisDriver->pushList('queue_userinfo', '1008', $data);
 // 出列 (无数据时等待60秒)
-$array = $redis_model->pullList('queue_userinfo', 60);
+$array = $redisDriver->pullList('queue_userinfo', 60);
 // 列表长度
-$size = $redis_model->getListSize('queue_userinfo');
+$size = $redisDriver->getListSize('queue_userinfo');
 // 删除
-$redis_model->deleteList('queue_userinfo');
+$redisDriver->delList('queue_userinfo');
 ```

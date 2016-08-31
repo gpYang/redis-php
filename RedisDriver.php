@@ -2,7 +2,7 @@
 
 /**
  * ------------------------------------------
- * redis 模型
+ * redis 驱动
  * @author 刘健 <59208859@qq.com>
  * ------------------------------------------
  *
@@ -19,7 +19,7 @@ class RedisDriver
     protected $redis; // redis对象
     protected $ip = '127.0.0.1'; // redis服务器ip地址
     protected $port = '6379'; // redis服务器端口
-    protected $passwd = ''; // redis密码
+    protected $passwd = null; // redis密码
 
     public function __construct($config = array())
     {
@@ -41,13 +41,13 @@ class RedisDriver
         if ($state == false) {
             die('redis connect failure');
         }
-        if ($this->passwd != '') {
+        if (!is_null($this->passwd)) {
             $this->redis->auth($this->passwd);
         }
     }
 
     // 设置一条String
-    public function setString($key, $text, $expire = null)
+    public function setStr($key, $text, $expire = null)
     {
         $key = 'string:' . $key;
         $this->redis->set($key, $text);
@@ -57,7 +57,7 @@ class RedisDriver
     }
 
     // 获取一条String
-    public function getString($key)
+    public function getStr($key)
     {
         $key = 'string:' . $key;
         $text = $this->redis->get($key);
@@ -65,35 +65,47 @@ class RedisDriver
     }
 
     // 删除一条String
-    public function deleteString($key)
+    public function delStr($key)
     {
         $key = 'string:' . $key;
         $this->redis->del($key);
     }
 
-    // 设置一条array
-    public function setArray($key, $arr, $expire = null)
+    // 设置一条Hash
+    public function setHash($key, $arr, $expire = null)
     {
-        $key = 'array:' . $key;
+        $key = 'hash:' . $key;
         $this->redis->hMset($key, $arr);
         if (!is_null($expire)) {
             $this->redis->setTimeout($key, $expire);
         }
     }
 
-    // 获取一条Arrry
-    public function getArray($key)
+    // 获取一条Hash，$fields可为字符串或数组
+    public function getHash($key, $fields = null)
     {
-        $key = 'array:' . $key;
-        $arr = $this->redis->hGetAll($key);
+        $key = 'hash:' . $key;
+        if (is_null($fields)) {
+            $arr = $this->redis->hGetAll($key);
+        } else {
+            if (is_array($fields)) {
+                $arr = $this->redis->hmGet($key, $fields);
+            } else {
+                $arr = $this->redis->hGet($key, $fields);
+            }
+        }
         return empty($arr) ? null : $arr;
     }
 
-    // 删除一条Array
-    public function deleteArray($key)
+    // 删除一条Hash，$field为字符串
+    public function delHash($key, $field = null)
     {
-        $key = 'array:' . $key;
-        $this->redis->del($key);
+        $key = 'hash:' . $key;
+        if (is_null($fields)) {
+            $this->redis->del($key);
+        } else {
+            $this->redis->hDel($key, $field);
+        }
     }
 
     // 设置表格的一行数据
@@ -106,7 +118,7 @@ class RedisDriver
         }
     }
 
-    // 获取表格的一行数据，$fields可为字符或数组
+    // 获取表格的一行数据，$fields可为字符串或数组
     public function getTableRow($table, $id, $fields = null)
     {
         $key = 'table:' . $table . ':' . $id;
@@ -123,7 +135,7 @@ class RedisDriver
     }
 
     // 删除表格的一行数据
-    public function deleteTableRow($table, $id)
+    public function delTableRow($table, $id)
     {
         $key = 'table:' . $table . ':' . $id;
         $this->redis->del($key);
@@ -157,7 +169,7 @@ class RedisDriver
     }
 
     // 删除列表
-    public function deleteList($key)
+    public function delList($key)
     {
         $key = 'list:' . $key;
         $this->redis->del($key);
