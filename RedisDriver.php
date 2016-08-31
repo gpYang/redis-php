@@ -92,7 +92,8 @@ class RedisDriver
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
             } else {
-                $arr = $this->redis->hGet($key, $fields);
+                $str = $this->redis->hGet($key, $fields);
+                $arr = array($fields => $str);
             }
         }
         return empty($arr) ? null : $arr;
@@ -112,7 +113,7 @@ class RedisDriver
     // 设置表格的一行数据
     public function setTableRow($table, $id, $arr, $expire = null)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         $this->redis->hMset($key, $arr);
         if (!is_null($expire)) {
             $this->redis->setTimeout($key, $expire);
@@ -122,14 +123,15 @@ class RedisDriver
     // 获取表格的一行数据，$fields可为字符串或数组
     public function getTableRow($table, $id, $fields = null)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         if (is_null($fields)) {
             $arr = $this->redis->hGetAll($key);
         } else {
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
             } else {
-                $arr = $this->redis->hGet($key, $fields);
+                $str = $this->redis->hGet($key, $fields);
+                $arr = array($fields => $str);
             }
         }
         return empty($arr) ? null : $arr;
@@ -138,7 +140,7 @@ class RedisDriver
     // 删除表格的一行数据
     public function delTableRow($table, $id)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         $this->redis->del($key);
     }
 
