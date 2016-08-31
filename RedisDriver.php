@@ -91,6 +91,11 @@ class RedisDriver
         } else {
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
+                foreach ($arr as $key => $value) {
+                    if (empty($value)) {
+                        unset($arr[$key]);
+                    }
+                }
             } else {
                 $arr = $this->redis->hGet($key, $fields);
             }
@@ -128,6 +133,11 @@ class RedisDriver
         } else {
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
+                foreach ($arr as $key => $value) {
+                    if (empty($value)) {
+                        unset($arr[$key]);
+                    }
+                }
             } else {
                 $arr = $this->redis->hGet($key, $fields);
             }
