@@ -102,7 +102,7 @@ class RedisDriver
     public function delHash($key, $field = null)
     {
         $key = 'hash:' . $key;
-        if (is_null($fields)) {
+        if (is_null($field)) {
             $this->redis->del($key);
         } else {
             $this->redis->hDel($key, $field);
