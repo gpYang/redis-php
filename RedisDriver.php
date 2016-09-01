@@ -92,7 +92,7 @@ class RedisDriver
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
                 foreach ($arr as $key => $value) {
-                    if (empty($value)) {
+                    if ($value === false) {
                         unset($arr[$key]);
                     }
                 }
@@ -111,6 +111,45 @@ class RedisDriver
             $this->redis->del($key);
         } else {
             $this->redis->hDel($key, $field);
+        }
+    }
+
+    // 在Hash的field内增加一个值 (值之间使用“,”分隔)
+    public function fieldAddVal($key, $field, $val)
+    {
+        $arr = $this->getHash($key, $field);
+        if (!is_null($arr)) {
+            $str = reset($arr);
+            $arr = explode(',', $str);
+            foreach ($arr as $v) {
+                if ($v == $val) {
+                    return;
+                }
+            }
+            $str .= ",{$val}";
+            $this->setHash($key, array($field => $str));
+        } else {
+            $this->setHash($key, array($field => $val));
+        }
+    }
+
+    // 在Hash的field内删除一个值
+    public function fieldDelVal($key, $field, $val)
+    {
+        $arr = $this->getHash($key, $field);
+        if (!is_null($arr)) {
+            $arr = explode(',', reset($arr));
+            $tmpStr = '';
+            foreach ($arr as $v) {
+                if ($v != $val) {
+                    $tmpStr .= ",{$v}";
+                }
+            }
+            if ($tmpStr == '') {
+                $this->delHash($key, $field);
+            } else {
+                $this->setHash($key, array($field => substr($tmpStr, 1)));
+            }
         }
     }
 
@@ -134,7 +173,7 @@ class RedisDriver
             if (is_array($fields)) {
                 $arr = $this->redis->hmGet($key, $fields);
                 foreach ($arr as $key => $value) {
-                    if (empty($value)) {
+                    if ($value === false) {
                         unset($arr[$key]);
                     }
                 }
