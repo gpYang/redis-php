@@ -6,10 +6,8 @@
  * @author 刘健 <59208859@qq.com>
  * ------------------------------------------
  *
- * 统一redis的配置与数据存储规范，便于扩展与修改
- *
- * # redis通常用于热数据与消息列队等场景
  * # list内存储array是采用json格式
+ * # 使用fieldAddVal/fieldDelVal时field内数据是采用","分隔
  *
  */
 
@@ -18,12 +16,11 @@ class RedisDriver
 
     protected $redis; // redis对象
     protected $ip = '127.0.0.1'; // redis服务器ip地址
-    protected $port = '6379'; // redis服务器端口
+    protected $port = 6379; // redis服务器端口
     protected $passwd = null; // redis密码
 
     public function __construct($config = array())
     {
-        ini_set('default_socket_timeout', -1); // 设置socket不超时
         $this->redis = new Redis();
         empty($config) or $this->connect($config);
     }
@@ -38,13 +35,19 @@ class RedisDriver
                 $this->passwd = $config['passwd'];
             }
         }
-        $state = $this->redis->connect($this->ip, $this->port);
+        $state = $this->redis->connect($this->ip, $this->port); // 这里如果设置timeout，是全局有效的，执行brPop时会受影响
         if ($state == false) {
             die('redis connect failure');
         }
         if (!is_null($this->passwd)) {
             $this->redis->auth($this->passwd);
         }
+    }
+
+    // 关闭连接
+    public function disconnect()
+    {
+        $this->redis->close();
     }
 
     // 设置一条String
@@ -156,7 +159,7 @@ class RedisDriver
     // 设置表格的一行数据
     public function setTableRow($table, $id, $arr, $expire = null)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         $this->redis->hMset($key, $arr);
         if (!is_null($expire)) {
             $this->redis->setTimeout($key, $expire);
@@ -166,7 +169,7 @@ class RedisDriver
     // 获取表格的一行数据，$fields可为字符串或数组
     public function getTableRow($table, $id, $fields = null)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         if (is_null($fields)) {
             $arr = $this->redis->hGetAll($key);
         } else {
@@ -187,7 +190,7 @@ class RedisDriver
     // 删除表格的一行数据
     public function delTableRow($table, $id)
     {
-        $key = 'table:' . $table . ':' . $id;
+        $key = '' . $table . ':' . $id;
         $this->redis->del($key);
     }
 
@@ -198,7 +201,7 @@ class RedisDriver
         $this->redis->lPush($key, json_encode($arr));
     }
 
-    // 从列表拉取一条数据，尾部
+    // 从列表拉取一条数据，尾部（注意：堵塞时间受限于php的default_socket_timeout）
     public function pullList($key, $timeout = 0)
     {
         $key = 'list:' . $key;
