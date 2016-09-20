@@ -25,6 +25,11 @@ class RedisDriver
         empty($config) or $this->connect($config);
     }
 
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
     // 连接redis服务器
     public function connect($config = array())
     {
